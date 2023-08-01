@@ -22,6 +22,10 @@ async function removeLiquidity() {
 
   // Approve for router to use LP
   const lpBalance = await pair.balanceOf(deployer.address);
+  if (lpBalance <= 5n) {
+    console.log(`No LP for token${tkAddress}`);
+    return;
+  }
   const approveTx = await pair.approve(await router.getAddress(), lpBalance);
   await approveTx.wait();
   console.log("Approved pair");
