@@ -78,7 +78,7 @@ async function rmLiqETH(
   console.log("Approved pair");
 
   // Remove liquidity ETH
-  const deadline = Math.round(Date.now() + 300);
+  const deadline = Math.round(Date.now() / 1000 + 300);
   const removeLiquidityTx = await router.removeLiquidityETH(
     tkAddress,
     lpBalance,
