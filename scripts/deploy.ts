@@ -5,6 +5,8 @@ async function deploy() {
   const tkName = process.env.TOKEN_NAME || "";
   const tkSymbol = process.env.TOKEN_SYMBOL || "";
   const initSupply = process.env.TOTAL_SUPPLY || -1;
+  const liq_percent = BigInt(process.env.LIQ_PERCENT || "");
+  const liq_eth = ethers.parseEther(process.env.LIQ_ETH || "");
 
   const routerAddress = process.env.ROUTER_ADDRESS || "";
 
@@ -27,7 +29,8 @@ async function deploy() {
   // Get info
   const tkAddress = await tk.getAddress();
   const totalSupply = await tk.totalSupply();
-  const amountToLiquidity = totalSupply / 2n;
+
+  const amountToLiquidity = (totalSupply * liq_percent) / 100n;
 
   // Approve for router to use token
   const approveTx = await tk.approve(routerAddress, totalSupply);
@@ -40,10 +43,10 @@ async function deploy() {
     tkAddress,
     amountToLiquidity,
     amountToLiquidity,
-    ethers.parseEther("1.0"),
+    liq_eth,
     deployer.address,
     deadline,
-    { value: ethers.parseEther("1.0") }
+    { value: liq_eth }
   );
   await tx.wait();
   console.log("Liquidity added");
