@@ -10,7 +10,7 @@ async function deploy() {
 
   const routerAddress = process.env.ROUTER_ADDRESS || "";
 
-  const [deployer, others] = await ethers.getSigners();
+  const [deployer, _] = await ethers.getSigners();
 
   const router = await ethers.getContractAt("IRouter", routerAddress);
   const factory = await ethers.getContractAt(
