@@ -37,6 +37,11 @@ const config: HardhatUserConfig = {
       accounts: [process.env.PRIVATE_KEY || ""],
     },
 
+    opbnb: {
+      url: "https://opbnb-mainnet-rpc.bnbchain.org",
+      accounts: [process.env.PRIVATE_KEY || ""],
+    },
+
     base: {
       url: "https://developer-access-mainnet.base.org",
       accounts: [process.env.PRIVATE_KEY || ""],
